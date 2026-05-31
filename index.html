@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lino - Gestão de Doces Artesanais</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Ícone do Navegador (Favicon) mapeado para a pasta local -->
+    <link rel="icon" href="favicon-16x16.png" type="image/png">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        'bordo-lino': '#6A1B3A',
+                        'creme-lino': '#FFF8F1',
+                        'cinza-claro-lino': '#F4EEF1',
+                        ouro: '#d4a373'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @media (min-width: 1024px) {
+            body {
+                overflow: hidden;
+                height: 100vh;
+            }
+        }
+        body {
+            background-color: #fcf9f5;
+        }
+        .tab-active {
+            border-bottom: 3px solid #6A1B3A;
+            color: #6A1B3A;
+            font-weight: 700;
+        }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        /* Custom scrollbar para tabelas pequenas */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #d1d5db;
+            border-radius: 4px;
+        }
+        /* No mobile, garante que a navegação de abas seja sticky logo abaixo do header */
+        @media (max-width: 1023px) {
+            .mobile-sticky-tabs {
+                position: sticky;
+                top: 60px; /* Altura aproximada do header */
+                z-index: 40;
+                background-color: #fcf9f5;
+                padding-top: 4px;
+                padding-bottom: 4px;
+                margin-left: -16px;
+                margin-right: -16px;
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+        }
+    </style>
+</head>
+<body class="text-neutral-800 min-h-screen flex flex-col lg:h-screen lg:overflow-hidden">
+
+    <!-- HEADER -->
+    <header class="bg-bordo-lino text-white shadow-md flex-none sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-row justify-between items-center gap-2">
+            <div class="flex items-center gap-3">
+                <img src="Square_Organic_Beauty_Cleanser_Logo_-_3-removebg-preview.png" alt="Lino Doces Artesanais" class="w-10 h-10 rounded-full bg-white object-cover border border-white shadow-sm">
+                <div>
+                    <h1 class="text-lg font-extrabold tracking-tight leading-tight">Lino - Doces Artesanais</h1>
+                    <p class="text-[10px] sm:text-[11px] text-cinza-claro-lino leading-tight">Gestão de Vendas da Melhor Confeiteira</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-7xl w-full mx-auto px-4 py-4 flex-1 grid grid-cols-1 lg:grid-cols-4 gap-4 overflow-x-hidden lg:overflow-hidden">
+        
+        <!-- DASHBOARD CENTRAL: No mobile vem PRIMEIRO (order-1), no desktop vai pra direita (lg:order-2) -->
+        <section class="lg:col-span-3 order-1 lg:order-2 flex flex-col gap-3 overflow-visible lg:overflow-hidden h-full">
+            
+            <!-- NAVEGAÇÃO POR ABAS -->
+            <div class="mobile-sticky-tabs flex-none">
+                <div class="bg-white rounded-xl shadow-sm border border-cinza-claro-lino overflow-x-auto flex px-1.5 py-1 custom-scrollbar">
+                    <nav class="flex w-full min-w-[500px]">
+                        <button id="btn-tab-prod" onclick="switchTab('prod')" class="flex-1 py-2 text-center text-xs font-bold transition duration-200 text-neutral-500 hover:text-bordo-lino flex items-center justify-center gap-1.5 tab-active">
+                            <i class="fa-solid fa-blender text-sm"></i> Produção
+                        </button>
+                        <button id="btn-tab-vendas" onclick="switchTab('vendas')" class="flex-1 py-2 text-center text-xs font-bold transition duration-200 text-neutral-500 hover:text-bordo-lino flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-cash-register text-sm"></i> Vendas
+                        </button>
+                        <button id="btn-tab-simulador" onclick="switchTab('simulador')" class="flex-1 py-2 text-center text-xs font-bold transition duration-200 text-neutral-500 hover:text-bordo-lino flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-chart-line text-sm"></i> Simulador
+                        </button>
+                        <button id="btn-tab-relatorio" onclick="switchTab('relatorio')" class="flex-1 py-2 text-center text-xs font-bold transition duration-200 text-neutral-500 hover:text-bordo-lino flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-file-invoice-dollar text-sm"></i> Relatório
+                        </button>
+                        <button id="btn-tab-settings" onclick="switchTab('settings')" class="flex-1 py-2 text-center text-xs font-bold transition duration-200 text-neutral-500 hover:text-bordo-lino flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-sliders text-sm"></i> Ingredientes
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- CONTEÚDO DAS ABAS -->
+            <div class="flex-1 overflow-visible lg:overflow-y-auto rounded-xl bg-transparent min-h-0 lg:pr-1 custom-scrollbar">
+
+                <!-- ABA 1: PRODUÇÃO DO DIA -->
+                <div id="tab-prod" class="tab-content block">
+                    <div class="bg-white rounded-xl p-4 sm:p-5 shadow-sm border border-cinza-claro-lino space-y-4">
+                        <div class="border-b border-neutral-100 pb-2">
+                            <h3 class="text-sm font-bold text-neutral-900 flex items-center gap-1.5">
+                                <i class="fa-solid fa-fire-burner text-bordo-lino"></i> Passo 1: Produção Diária
+                            </h3>
+                        </div>
+
+                        <div class="max-w-xs space-y-1">
+                            <label class="block text-xs font-bold text-neutral-700" for="input-fornadas">
+                                Quantidade de medidas / fornadas:
+                            </label>
+                            <div class="relative rounded-lg shadow-sm">
+                                <!-- inputmode decimal para abrir teclado de numeros com virgula -->
+                                <input type="number" inputmode="decimal" id="input-fornadas" value="1" min="0.1" step="0.1" oninput="atualizarCalculos()"
+                                    class="w-full bg-neutral-50 border border-neutral-300 rounded-lg px-3 py-2 text-sm text-neutral-900 font-bold focus:ring-1 focus:ring-bordo-lino outline-none">
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-[11px] font-bold text-neutral-400">
+                                    Fornada(s)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 pt-1">
+                            <h4 class="text-xs font-bold text-bordo-lino uppercase tracking-wider">Rendimento por Sabor (Pedaços inteiros)</h4>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div class="p-3 bg-neutral-50 rounded-lg border border-neutral-200 flex justify-between items-center gap-2">
+                                    <div>
+                                        <span class="font-bold text-xs text-neutral-800 block">Tradicional (Sem Recheio)</span>
+                                    </div>
+                                    <!-- inputmode numeric para abrir teclado de numeros inteiros grande no celular -->
+                                    <input type="number" inputmode="numeric" id="prod-tradicional" value="0" min="0" step="1" oninput="atualizarCalculos()"
+                                        class="w-20 sm:w-24 bg-white border border-neutral-300 rounded-lg py-1.5 px-2 text-center text-sm sm:text-xs font-bold text-neutral-900 focus:ring-1 focus:ring-bordo-lino outline-none">
+                                </div>
+
+                                <div class="p-3 bg-neutral-50 rounded-lg border border-neutral-200 flex justify-between items-center gap-2">
+                                    <div>
+                                        <span class="font-bold text-xs text-neutral-800 block">Recheado com Nutella</span>
+                                    </div>
+                                    <input type="number" inputmode="numeric" id="prod-nutella" value="0" min="0" step="1" oninput="atualizarCalculos()"
+                                        class="w-20 sm:w-24 bg-white border border-neutral-300 rounded-lg py-1.5 px-2 text-center text-sm sm:text-xs font-bold text-neutral-900 focus:ring-1 focus:ring-bordo-lino outline-none">
+                                </div>
+
+                                <div class="p-3 bg-neutral-50 rounded-lg border border-neutral-200 flex justify-between items-center gap-2">
+                                    <div>
+                                        <span class="font-bold text-xs text-neutral-800 block">Recheado com Leite Ninho</span>
+                                    </div>
+                                    <input type="number" inputmode="numeric" id="prod-ninho" value="0" min="0" step="1" oninput="atualizarCalculos()"
+                                        class="w-20 sm:w-24 bg-white border border-neutral-300 rounded-lg py-1.5 px-2 text-center text-sm sm:text-xs font-bold text-neutral-900 focus:ring-1 focus:ring-bordo-lino outline-none">
+                                </div>
+
+                                <div class="p-3 bg-neutral-50 rounded-lg border border-neutral-200 flex justify-between items-center gap-2">
+                                    <div>
+                                        <span class="font-bold text-xs text-neutral-800 block">Recheado com Doce de Leite</span>
+                                    </div>
+                                    <input type="number" inputmode="numeric" id="prod-doce" value="0" min="0" step="1" oninput="atualizarCalculos()"
+                                        class="w-20 sm:w-24 bg-white border border-neutral-300 rounded-lg py-1.5 px-2 text-center text-sm sm:text-xs font-bold text-neutral-900 focus:ring-1 focus:ring-bordo-lino outline-none">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-creme-lino p-3 rounded-lg border border-cinza-claro-lino flex flex-col sm:flex-row justify-between items-center gap-3 text-center sm:text-left mt-2">
+                            <div class="grid grid-cols-2 gap-4 w-full sm:w-auto">
+                                <div>
+                                    <span class="text-[10px] text-neutral-500 font-bold uppercase block">Total Produzido</span>
+                                    <span class="text-base font-black text-bordo-lino" id="total-produzido-txt">0 un</span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-neutral-500 font-bold uppercase block">Custo Massa/Pedaço</span>
+                                    <span class="text-base font-black text-bordo-lino" id="custo-massa-pedaco-txt">R$ 0,00</span>
+                                </div>
+                            </div>
+                            <button onclick="switchTab('vendas')" class="w-full sm:w-auto bg-bordo-lino hover:opacity-95 text-white font-bold text-sm sm:text-xs px-4 py-3 sm:py-2.5 rounded-lg flex items-center justify-center gap-1.5 transition shadow-sm">
+                                Lançar Vendas <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA 2: REGISTRO DE VENDAS -->
+                <div id="tab-vendas" class="tab-content hidden">
+                    <div class="bg-white rounded-xl p-4 sm:p-5 shadow-sm border border-cinza-claro-lino space-y-4">
+                        <div class="border-b border-neutral-100 pb-2">
+                            <h3 class="text-sm font-bold text-neutral-900 flex items-center gap-1.5">
+                                <i class="fa-solid fa-basket-shopping text-bordo-lino"></i> Passo 2: Registro Contínuo de Vendas
+                            </h3>
+                            <p class="text-[11px] text-neutral-500 mt-1 leading-tight">Ao digitar, os valores já vão direto para o relatório geral. O botão "+ Adicionar" serve para registrar o mesmo sabor vendido por um preço diferente.</p>
+                        </div>
+
+                        <div class="space-y-3" id="container-vendas-sabores">
+                            <!-- Injetado dinamicamente via JS -->
+                        </div>
+
+                        <div class="pt-2 flex flex-col sm:flex-row justify-between items-center gap-3 border-t border-neutral-100 text-[11px] text-neutral-400">
+                            <span class="text-center sm:text-left"><i class="fa-solid fa-info-circle"></i> O relatório atualiza sozinho as vendas lançadas.</span>
+                            <button onclick="switchTab('relatorio')" class="w-full sm:w-auto bg-bordo-lino hover:opacity-95 text-white font-bold text-sm sm:text-xs px-4 py-3 sm:py-2.5 rounded-lg flex items-center justify-center gap-1.5 transition shadow-sm">
+                                Ver Resultado Final <i class="fa-solid fa-square-poll-vertical"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA 3: SIMULADOR DE METAS -->
+                <div id="tab-simulador" class="tab-content hidden">
+                    <div class="bg-white rounded-xl p-4 sm:p-5 shadow-sm border border-cinza-claro-lino space-y-4">
+                        <div class="border-b border-neutral-100 pb-2">
+                            <h3 class="text-sm font-bold text-neutral-900 flex items-center gap-1.5">
+                                <i class="fa-solid fa-bullseye text-bordo-lino"></i> Simulador de Lucro Requerido
+                            </h3>
+                        </div>
+
+                        <div class="max-w-xs space-y-1">
+                            <label class="block text-xs font-bold text-neutral-700" for="input-meta-lucro">
+                                Quanto você deseja lucrar limpo? (R$)
+                            </label>
+                            <div class="relative rounded-lg shadow-sm">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-xs font-bold text-neutral-500">
+                                    R$
+                                </div>
+                                <input type="number" inputmode="decimal" id="input-meta-lucro" value="100.00" min="1" step="5" oninput="calcularSimulacao()"
+                                    class="w-full bg-neutral-50 border border-neutral-300 rounded-lg pl-8 pr-3 py-3 sm:py-2 text-sm text-neutral-900 font-black focus:ring-1 focus:ring-bordo-lino outline-none">
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto border border-neutral-200 rounded-lg custom-scrollbar">
+                            <table class="min-w-full divide-y divide-neutral-200 text-left text-xs">
+                                <thead class="bg-creme-lino text-neutral-900 font-bold">
+                                    <tr>
+                                        <th class="px-3 py-2 whitespace-nowrap">Sabor</th>
+                                        <th class="px-3 py-2 whitespace-nowrap">Custo Unitário</th>
+                                        <th class="px-3 py-2 whitespace-nowrap">Preço Sugerido</th>
+                                        <th class="px-3 py-2 text-center whitespace-nowrap">Lucro Unitário</th>
+                                        <th class="px-3 py-2 text-center bg-cinza-claro-lino font-black text-bordo-lino whitespace-nowrap">Meta</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-neutral-200 font-medium bg-white" id="tabela-simulacao-corpo">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA 4: RELATÓRIO DO DIA -->
+                <div id="tab-relatorio" class="tab-content hidden">
+                    <div class="flex justify-end mb-2 no-print hidden lg:flex">
+                        <button onclick="window.print()" class="bg-neutral-800 hover:bg-neutral-900 text-white font-bold text-[11px] px-3 py-1.5 rounded-lg flex items-center gap-1 shadow transition">
+                            <i class="fa-solid fa-print"></i> Imprimir / PDF
+                        </button>
+                    </div>
+
+                    <div id="print-area" class="bg-white rounded-xl p-4 sm:p-5 shadow-sm border border-cinza-claro-lino space-y-4">
+                        <div class="text-center pb-2 border-b-2 border-bordo-lino">
+                            <h2 class="text-base font-extrabold text-neutral-900 uppercase tracking-wide">Resumo Operacional</h2>
+                            <p class="text-[10px] text-neutral-500 mt-0.5" id="relatorio-data-atual">--/--/----</p>
+                        </div>
+
+                        <!-- CARDS DE MÉTRICAS GERAIS -->
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                            <div class="p-2.5 bg-neutral-50 rounded-lg border border-neutral-200">
+                                <span class="text-[10px] text-neutral-400 font-bold block uppercase">Total Produzido</span>
+                                <span class="text-base sm:text-lg font-black text-neutral-900 mt-0.5 block" id="rep-total-produzido">0 un</span>
+                            </div>
+                            <div class="p-2.5 bg-neutral-50 rounded-lg border border-neutral-200">
+                                <span class="text-[10px] text-neutral-400 font-bold block uppercase">Total Vendido</span>
+                                <span class="text-base sm:text-lg font-black text-neutral-900 mt-0.5 block" id="rep-total-vendido">0 un</span>
+                            </div>
+                            <div class="p-2.5 bg-emerald-50 rounded-lg border border-emerald-200">
+                                <span class="text-[10px] text-emerald-600 font-bold block uppercase">Faturamento Total</span>
+                                <span class="text-base sm:text-lg font-black text-emerald-800 mt-0.5 block" id="rep-faturamento">R$ 0,00</span>
+                            </div>
+                            <div class="p-2.5 bg-blue-50 rounded-lg border border-blue-200">
+                                <span class="text-[10px] text-blue-600 font-bold block uppercase">Lucro Real</span>
+                                <span class="text-base sm:text-lg font-black text-blue-800 mt-0.5 block" id="rep-lucro">R$ 0,00</span>
+                            </div>
+                        </div>
+
+                        <!-- CARD ALERTA ADICIONAL: CAIXA FINAL -->
+                        <div id="alerta-caixa-container" class="p-3 rounded-lg border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3">
+                            <div class="text-xs">
+                                <span class="font-bold block text-sm sm:text-xs" id="alerta-caixa-titulo">Saldo Geral em Caixa</span>
+                                <span class="text-[10px] block text-neutral-500" id="alerta-caixa-desc">Dedução total da produção.</span>
+                            </div>
+                            <span class="text-2xl sm:text-lg font-black" id="rep-caixa-final">R$ 0,00</span>
+                        </div>
+
+                        <!-- DETALHAMENTO DE PRODUTIVIDADE E SABORES -->
+                        <div class="space-y-2">
+                            <h4 class="font-bold text-neutral-900 border-l-4 border-bordo-lino pl-1.5 text-xs uppercase tracking-wider">Tabela de Controle Detalhada</h4>
+                            
+                            <div class="overflow-x-auto border border-neutral-200 rounded-lg custom-scrollbar">
+                                <table class="min-w-full divide-y divide-neutral-200 text-xs">
+                                    <thead class="bg-neutral-50 font-bold text-neutral-700 text-left">
+                                        <tr>
+                                            <th class="px-3 py-2 whitespace-nowrap">Sabor</th>
+                                            <th class="px-3 py-2 text-center whitespace-nowrap">Produz</th>
+                                            <th class="px-3 py-2 text-center whitespace-nowrap">Vendido</th>
+                                            <th class="px-3 py-2 text-center whitespace-nowrap">Sobra</th>
+                                            <th class="px-3 py-2 text-right whitespace-nowrap">Custo Un.</th>
+                                            <th class="px-3 py-2 text-right whitespace-nowrap">Faturam.</th>
+                                            <th class="px-3 py-2 text-right text-bordo-lino font-bold whitespace-nowrap">Lucro</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabela-relatorio-corpo" class="divide-y divide-neutral-200 bg-white">
+                                        <!-- Injetado dinamicamente -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA 5: INGREDIENTES E ESTOQUE DE COMPRAS -->
+                <div id="tab-settings" class="tab-content hidden">
+                    <div class="bg-white rounded-xl p-4 sm:p-5 shadow-sm border border-cinza-claro-lino space-y-4">
+                        <div class="border-b border-neutral-100 pb-2 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                            <div>
+                                <h3 class="text-sm font-bold text-neutral-900 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-cart-flatbed text-bordo-lino"></i> Controle do Mercado
+                                </h3>
+                                <p class="text-[11px] text-neutral-500 mt-0.5">As alterações são salvas automaticamente enquanto você digita.</p>
+                            </div>
+                            <button onclick="restaurarValoresPadrao()" class="text-[11px] text-bordo-lino underline font-bold whitespace-nowrap w-fit">
+                                <i class="fa-solid fa-rotate-left"></i> Restaurar Padrão
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <!-- BLOCO: INGREDIENTES DA MASSA E RECEITA -->
+                            <div class="space-y-4">
+                                <div class="space-y-2">
+                                    <h4 class="font-bold text-bordo-lino text-xs border-b border-neutral-200 pb-1 flex items-center gap-1 bg-neutral-50 p-2 rounded-t-lg border-x border-t">
+                                        <i class="fa-solid fa-scale-balanced"></i> Proporções da Receita (Para 1 Fornada)
+                                    </h4>
+                                    <div class="grid grid-cols-3 sm:grid-cols-5 gap-2 px-2 pb-2">
+                                        <div class="space-y-1">
+                                            <label class="block text-[10px] font-bold text-neutral-600 text-center">Ovos (un):</label>
+                                            <input type="number" inputmode="decimal" id="rec-ovo" step="0.5" onchange="atualizarCampoReceita('ovo', this.value)" class="w-full border border-neutral-300 rounded p-1.5 font-bold outline-none text-center bg-white shadow-sm text-sm sm:text-xs">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label class="block text-[10px] font-bold text-neutral-600 text-center">Açúcar (g):</label>
+                                            <input type="number" inputmode="numeric" id="rec-acucar" step="1" onchange="atualizarCampoReceita('acucar', this.value)" class="w-full border border-neutral-300 rounded p-1.5 font-bold outline-none text-center bg-white shadow-sm text-sm sm:text-xs">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label class="block text-[10px] font-bold text-neutral-600 text-center">Manteiga (g):</label>
+                                            <input type="number" inputmode="numeric" id="rec-manteiga" step="1" onchange="atualizarCampoReceita('manteiga', this.value)" class="w-full border border-neutral-300 rounded p-1.5 font-bold outline-none text-center bg-white shadow-sm text-sm sm:text-xs">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label class="block text-[10px] font-bold text-neutral-600 text-center">Nescau (g):</label>
+                                            <input type="number" inputmode="numeric" id="rec-nescau" step="1" onchange="atualizarCampoReceita('nescau', this.value)" class="w-full border border-neutral-300 rounded p-1.5 font-bold outline-none text-center bg-white shadow-sm text-sm sm:text-xs">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label class="block text-[10px] font-bold text-neutral-600 text-center">Farinha (g):</label>
+                                            <input type="number" inputmode="numeric" id="rec-farinha" step="1" onchange="atualizarCampoReceita('farinha', this.value)" class="w-full border border-neutral-300 rounded p-1.5 font-bold outline-none text-center bg-white shadow-sm text-sm sm:text-xs">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h4 class="font-bold text-bordo-lino text-xs border-b border-neutral-200 pb-1 flex items-center gap-1 bg-neutral-50 p-2 rounded-t-lg border-x border-t">
+                                    <i class="fa-solid fa-egg"></i> Compras da Massa
+                                </h4>
+                                
+                                <div class="space-y-3 px-2">
+                                    <div class="space-y-1.5 border border-neutral-200 p-2.5 rounded-lg bg-white relative">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="font-bold text-xs text-neutral-800">Nescau (Em uso: <span id="label-uso-nescau" class="text-bordo-lino"></span>)</span>
+                                            <button onclick="adicionarVariacao('nescau')" class="text-[10px] bg-neutral-100 hover:bg-neutral-200 text-neutral-600 px-2 py-1 rounded font-bold transition"><i class="fa-solid fa-plus"></i> Novo</button>
+                                        </div>
+                                        <div id="lista-var-nescau" class="space-y-2"></div>
+                                    </div>
+                                    <div class="space-y-1.5 border border-neutral-200 p-2.5 rounded-lg bg-white relative">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="font-bold text-xs text-neutral-800">Manteiga (Em uso: <span id="label-uso-manteiga" class="text-bordo-lino"></span>)</span>
+                                            <button onclick="adicionarVariacao('manteiga')" class="text-[10px] bg-neutral-100 hover:bg-neutral-200 text-neutral-600 px-2 py-1 rounded font-bold transition"><i class="fa-solid fa-plus"></i> Novo</button>
+                                        </div>
+                                        <div id="lista-var-manteiga" class="space-y-2"></div>
+                                    </div>
+                                    <div class="space-y-1.5 border border-neutral-200 p-2.5 rounded-lg bg-white relative">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="font-bold text-xs text-neutral-800">Farinha (Em uso: <span id="label-uso-farinha" class="text-bordo-lino"></span>)</span>
+                                            <button onclick="adicionarVariacao('farinha')" class="text-[10px] bg-neutral-100 hover:bg-neutral-200 text-neutral-600 px-2 py-1 rounded font-bold transition"><i class="fa-solid fa-plus"></i> Novo</button>
+                                        </div>
+                                        <div id="lista-var-farinha" class="space-y-2"></div>
+                                    </div>
+                                    <div class="space-y-1.5 border border-neutral-200 p-2.5 rounded-lg bg-white relative">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="font-bold text-xs text-neutral-800">Açúcar (Em uso: <span id="label-uso-acucar" class="text-bordo-lino"></span>)</span>
+                                            <button onclick="adicionarVariacao('acucar')" class="text-[10px] bg-neutral-100 hover:bg-neutral-200 text-neutral-600 px-2 py-1 rounded font-bold transition"><i class="fa-solid fa-plus"></i> Novo</button>
+                                        </div>
+                                        <div id="lista-var-acucar" class="space-y-2"></div>
+                                    </div>
+                                    <div class="space-y-1.5 border border-neutral-200 p-2.5 rounded-lg bg-white relative">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="font-bold text-xs text-neutral-800">Ovos (Em uso: <span id="label-uso-ovo" class="text-bordo-lino"></span>)</span>
+                                            <button onclick="adicionarVariacao('ovo')" class="text-[10px] bg-neutral-100 hover:bg-neutral-200 text-neutral-600 px-2 py-1 rounded font-bold transition"><i class="fa-solid fa-plus"></i> Novo</button>
+                                        </div>
+                                        <div id="lista-var-ovo" class="space-y-2"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- BLOCO: RECHEIOS E OPERACIONAL -->
+                            <div class="space-y-4">
+                                <h4 class="font-bold text-bordo-lino text-xs border-b border-neutral-200 pb-1 flex items-center gap-1 bg-neutral-50 p-2 rounded-t-lg border-x border-t">
+                                    <i class="fa-solid fa-jar"></i> Recheios Principais
+                                </h4>
+                                
+                                <div class="space-y-3 px-2">
+                                    <div class="space-y-1.5 border border-neutral-200 p-2.5 rounded-lg bg-white relative">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="font-bold text-xs text-neutral-800">Nutella (Em uso: <span id="label-uso-nutella" class="text-bordo-lino"></span>)</span>
+                                            <button onclick="adicionarVariacao('nutella')" class="text-[10px] bg-neutral-100 hover:bg-neutral-200 text-neutral-600 px-2 py-1 rounded font-bold transition"><i class="fa-solid fa-plus"></i> Novo</button>
+                                        </div>
+                                        <div id="lista-var-nutella" class="space-y-2"></div>
+                                    </div>
+                                    <div class="space-y-1.5 border border-neutral-200 p-2.5 rounded-lg bg-white relative">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="font-bold text-xs text-neutral-800">Ninho/Base (Em uso: <span id="label-uso-ninho" class="text-bordo-lino"></span>)</span>
+                                            <button onclick="adicionarVariacao('ninho')" class="text-[10px] bg-neutral-100 hover:bg-neutral-200 text-neutral-600 px-2 py-1 rounded font-bold transition"><i class="fa-solid fa-plus"></i> Novo</button>
+                                        </div>
+                                        <div id="lista-var-ninho" class="space-y-2"></div>
+                                    </div>
+                                    <div class="space-y-1.5 border border-neutral-200 p-2.5 rounded-lg bg-white relative">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="font-bold text-xs text-neutral-800">Doce Leite (Em uso: <span id="label-uso-doce" class="text-bordo-lino"></span>)</span>
+                                            <button onclick="adicionarVariacao('doce')" class="text-[10px] bg-neutral-100 hover:bg-neutral-200 text-neutral-600 px-2 py-1 rounded font-bold transition"><i class="fa-solid fa-plus"></i> Novo</button>
+                                        </div>
+                                        <div id="lista-var-doce" class="space-y-2"></div>
+                                    </div>
+                                </div>
+
+                                <h4 class="font-bold text-bordo-lino text-xs border-b border-neutral-200 pb-1 flex items-center gap-1 bg-neutral-50 p-2 rounded-t-lg border-x border-t mt-6">
+                                    <i class="fa-solid fa-gas-pump"></i> Operacional
+                                </h4>
+                                <div class="space-y-3 px-2">
+                                    <div class="space-y-1.5 border border-neutral-200 p-2.5 rounded-lg bg-white relative">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="font-bold text-xs text-neutral-800">Gás (Em uso: <span id="label-uso-gas" class="text-bordo-lino"></span>)</span>
+                                            <button onclick="adicionarVariacao('gas')" class="text-[10px] bg-neutral-100 hover:bg-neutral-200 text-neutral-600 px-2 py-1 rounded font-bold transition"><i class="fa-solid fa-plus"></i> Novo</button>
+                                        </div>
+                                        <div id="lista-var-gas" class="space-y-2"></div>
+                                    </div>
+                                    <div class="space-y-1.5 border border-neutral-200 p-2.5 rounded-lg bg-white relative">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="font-bold text-xs text-neutral-800">Embalagem (Em uso: <span id="label-uso-embalagem" class="text-bordo-lino"></span>)</span>
+                                            <button onclick="adicionarVariacao('embalagem')" class="text-[10px] bg-neutral-100 hover:bg-neutral-200 text-neutral-600 px-2 py-1 rounded font-bold transition"><i class="fa-solid fa-plus"></i> Novo</button>
+                                        </div>
+                                        <div id="lista-var-embalagem" class="space-y-2"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SIDEBAR FIXO - MOVIDO PARA O FIM NO MOBILE (order-2), INICIO NO DESKTOP (lg:order-1) -->
+        <aside class="lg:col-span-1 order-2 lg:order-1 bg-white rounded-xl p-4 shadow-sm border border-cinza-claro-lino flex flex-col gap-3 overflow-visible lg:overflow-y-auto max-h-full h-fit lg:h-auto">
+            <div class="flex items-center gap-2 border-b border-neutral-100 pb-2">
+                <i class="fa-solid fa-calculator text-bordo-lino text-base"></i>
+                <h2 class="font-bold text-neutral-900 text-sm">Resumo de Custos (Painel)</h2>
+            </div>
+            
+            <div class="space-y-3 flex-1">
+                <div class="p-2.5 bg-creme-lino rounded-lg border border-cinza-claro-lino">
+                    <div class="text-[11px] text-bordo-lino font-bold uppercase tracking-wider">Custo de 1 Fornada (Massa + Gás)</div>
+                    <div class="text-xl font-black text-neutral-800 mt-0.5" id="side-custo-fornada">R$ 0,00</div>
+                </div>
+
+                <div class="space-y-1.5 text-xs">
+                    <div class="font-bold text-neutral-400 uppercase tracking-wider text-[9px]">Gasto Base em 1 Fornada</div>
+                    
+                    <div class="flex justify-between py-1 border-b border-dashed border-neutral-100">
+                        <span class="text-neutral-600" id="label-sidebar-ovo">Ovos:</span>
+                        <span class="font-bold text-neutral-800" id="side-gasto-ovo">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-dashed border-neutral-100">
+                        <span class="text-neutral-600" id="label-sidebar-acucar">Açúcar:</span>
+                        <span class="font-bold text-neutral-800" id="side-gasto-acucar">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-dashed border-neutral-100">
+                        <span class="text-neutral-600" id="label-sidebar-manteiga">Manteiga:</span>
+                        <span class="font-bold text-neutral-800" id="side-gasto-manteiga">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-dashed border-neutral-100">
+                        <span class="text-neutral-600" id="label-sidebar-nescau">Nescau:</span>
+                        <span class="font-bold text-neutral-800" id="side-gasto-nescau">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-dashed border-neutral-100">
+                        <span class="text-neutral-600" id="label-sidebar-farinha">Farinha:</span>
+                        <span class="font-bold text-neutral-800" id="side-gasto-farinha">R$ 0,00</span>
+                    </div>
+                     <div class="flex justify-between py-1 border-b border-dashed border-neutral-100">
+                        <span class="text-neutral-600">Gás Estimado:</span>
+                        <span class="font-bold text-neutral-800" id="side-gasto-gas">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5 text-xs pt-1">
+                    <div class="font-bold text-neutral-400 uppercase tracking-wider text-[9px]">Custos Adicionais (Por Doce Único)</div>
+                    
+                    <div class="flex justify-between py-1 border-b border-dashed border-neutral-100">
+                        <span class="text-neutral-600">Embalagem Individual:</span>
+                        <span class="font-bold text-neutral-800" id="side-custo-embalagem">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-dashed border-neutral-100 text-bordo-lino">
+                        <span>Dose Recheio Nutella:</span>
+                        <span class="font-bold" id="side-recheio-nutella">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-dashed border-neutral-100 text-bordo-lino">
+                        <span>Dose Recheio Ninho:</span>
+                        <span class="font-bold" id="side-recheio-ninho">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-dashed border-neutral-100 text-bordo-lino">
+                        <span>Dose Recheio Doce de Leite:</span>
+                        <span class="font-bold" id="side-recheio-doce">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+    </main>
+
+    <footer class="bg-bordo-lino text-cinza-claro-lino text-center py-2 text-[10px] border-t border-cinza-claro-lino border-opacity-20 no-print flex-none">
+        <p>© 2026 Lino - Doces Artesanais. Criado com dedicação para a melhor confeiteira.</p>
+    </footer>
+
+    <!-- LÓGICA DE PROGRAMAÇÃO EM VANILLA JAVASCRIPT -->
+    <script>
+        const ESTOQUE_PADRAO = {
+            manteiga:  { ativoId: 1, variacoes: [{ id: 1, nome: "Pote Padrão", valor: 9.99, medida: 500, labelMedida: "g" }] },
+            nescau:    { ativoId: 1, variacoes: [{ id: 1, nome: "Lata Pequena", valor: 11.99, medida: 350, labelMedida: "g" }, { id: 2, nome: "Pacote Grande", valor: 19.90, medida: 730, labelMedida: "g" }] },
+            farinha:   { ativoId: 1, variacoes: [{ id: 1, nome: "Saco 1kg", valor: 3.99, medida: 1000, labelMedida: "g" }] },
+            ovo:       { ativoId: 1, variacoes: [{ id: 1, nome: "Cartela 20", valor: 12.90, medida: 20, labelMedida: "un" }, { id: 2, nome: "Cartela 30", valor: 22.00, medida: 30, labelMedida: "un" }] },
+            acucar:    { ativoId: 1, variacoes: [{ id: 1, nome: "Saco 1kg", valor: 4.39, medida: 1000, labelMedida: "g" }] },
+            
+            gas:       { ativoId: 1, variacoes: [{ id: 1, nome: "Botijão 13kg", valor: 149.90, medida: 55, labelMedida: "fornadas" }] },
+            embalagem: { ativoId: 1, variacoes: [{ id: 1, nome: "Pacote 500", valor: 70.00, medida: 500, labelMedida: "un" }] },
+            
+            nutella:   { ativoId: 1, variacoes: [{ id: 1, nome: "Pote Padrão", valor: 29.90, medida: 25, labelMedida: "rendimento" }, { id: 2, nome: "Pote Grande", valor: 55.00, medida: 50, labelMedida: "rendimento" }] },
+            ninho:     { ativoId: 1, variacoes: [{ id: 1, nome: "Receita Padrão", valor: 19.90, medida: 20, labelMedida: "rendimento" }] },
+            doce:      { ativoId: 1, variacoes: [{ id: 1, nome: "Lata Cozida", valor: 8.99, medida: 20, labelMedida: "rendimento" }] }
+        };
+
+        const RECEITA_PADRAO = { ovo: 3.0, acucar: 150.0, manteiga: 128.0, nescau: 300.0, farinha: 200.0 };
+        const PRECOS_SUGERIDOS_PADRAO = { tradicional: 6.00, nutella: 9.00, ninho: 9.00, doce: 9.00 };
+
+        let estoque = JSON.parse(JSON.stringify(ESTOQUE_PADRAO));
+        let receitaBase = JSON.parse(JSON.stringify(RECEITA_PADRAO));
+        let custoCalculado = {}; 
+
+        let sabores = {
+            tradicional: { nome: "Sem Recheio (Tradicional)", produzido: 0, vendas: [] },
+            nutella: { nome: "Recheado com Nutella", produzido: 0, vendas: [] },
+            ninho: { nome: "Recheado com Leite Ninho", produzido: 0, vendas: [] },
+            doce: { nome: "Recheado com Doce de Leite", produzido: 0, vendas: [] }
+        };
+
+        function formatMoeda(valor) {
+            return (Number(valor) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('lino_estoque_v14')) {
+                estoque = JSON.parse(localStorage.getItem('lino_estoque_v14'));
+            } else {
+                localStorage.setItem('lino_estoque_v14', JSON.stringify(estoque));
+            }
+
+            if (localStorage.getItem('lino_receita_v14')) {
+                receitaBase = JSON.parse(localStorage.getItem('lino_receita_v14'));
+            } else {
+                localStorage.setItem('lino_receita_v14', JSON.stringify(receitaBase));
+            }
+            
+            const hoje = new Date();
+            document.getElementById('relatorio-data-atual').innerText = `Relatório gerado em: ${hoje.toLocaleDateString('pt-BR')}`;
+
+            renderizarAbaSettings();
+            atualizarCalculos();
+            switchTab('prod'); // Garante aba default e limpa telas antigas
+            
+            // Corrige scroll da pagina no load se ficou sujo da sessao anterior no mobile
+            window.scrollTo(0,0);
+        });
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('block'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabId}`).classList.add('block');
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('tab-active'));
+            document.getElementById(`btn-tab-${tabId}`).classList.add('tab-active');
+            
+            if (tabId === 'vendas') renderizarFormVendas();
+            if (tabId === 'simulador') calcularSimulacao();
+            if (tabId === 'relatorio') gerarRelatorio();
+            if (tabId === 'settings') renderizarAbaSettings(); 
+            
+            // No mobile, se ele mudar de aba, sobe a tela pro inicio das abas suavemente
+            if(window.innerWidth < 1024) {
+                 const tabsBar = document.querySelector('.mobile-sticky-tabs');
+                 if(tabsBar) {
+                     window.scrollTo({ top: tabsBar.offsetTop - 10, behavior: 'smooth' });
+                 }
+            }
+        }
+
+        function renderizarAbaSettings() {
+            document.getElementById('rec-ovo').value = receitaBase.ovo;
+            document.getElementById('rec-acucar').value = receitaBase.acucar;
+            document.getElementById('rec-manteiga').value = receitaBase.manteiga;
+            document.getElementById('rec-nescau').value = receitaBase.nescau;
+            document.getElementById('rec-farinha').value = receitaBase.farinha;
+
+            Object.keys(estoque).forEach(categoria => {
+                const containerLista = document.getElementById(`lista-var-${categoria}`);
+                const labelUso = document.getElementById(`label-uso-${categoria}`);
+                if(!containerLista) return;
+                
+                containerLista.innerHTML = '';
+                let nomeAtivoEncontrado = "Nenhum";
+                
+                estoque[categoria].variacoes.forEach(variacao => {
+                    let isAtivo = estoque[categoria].ativoId === variacao.id;
+                    if(isAtivo) nomeAtivoEncontrado = variacao.nome;
+
+                    let divItem = document.createElement('div');
+                    divItem.className = `flex flex-wrap sm:flex-nowrap justify-between gap-2 p-2 border rounded text-[10px] ${isAtivo ? 'border-bordo-lino bg-bordo-lino bg-opacity-5' : 'border-neutral-200'}`;
+                    
+                    divItem.innerHTML = `
+                        <div class="flex items-center gap-2 w-full sm:w-auto flex-1">
+                            <input type="radio" name="radio-${categoria}" value="${variacao.id}" ${isAtivo ? 'checked' : ''} onchange="selecionarVariacao('${categoria}', ${variacao.id})" class="accent-bordo-lino w-5 h-5 cursor-pointer flex-shrink-0">
+                            <input type="text" value="${variacao.nome}" onchange="atualizarCampoVariacao('${categoria}', ${variacao.id}, 'nome', this.value)" class="border border-neutral-300 rounded px-1.5 py-1 w-full text-sm sm:text-xs font-bold outline-none min-w-[80px]" placeholder="Nome">
+                        </div>
+                        <div class="flex items-center justify-between sm:justify-end gap-1 w-full sm:w-auto">
+                            <div class="flex items-center gap-1">
+                                <span class="text-neutral-500">R$</span>
+                                <input type="number" inputmode="decimal" step="0.01" value="${variacao.valor.toFixed(2)}" onchange="atualizarCampoVariacao('${categoria}', ${variacao.id}, 'valor', this.value)" class="border border-neutral-300 rounded px-1.5 py-1.5 sm:py-1 w-16 text-sm sm:text-xs font-bold outline-none text-right">
+                            </div>
+                            <span class="text-neutral-400">/</span>
+                            <div class="flex items-center gap-1 flex-1 sm:flex-none">
+                                <input type="number" inputmode="numeric" step="1" value="${variacao.medida}" onchange="atualizarCampoVariacao('${categoria}', ${variacao.id}, 'medida', this.value)" class="border border-neutral-300 rounded px-1.5 py-1.5 sm:py-1 w-12 text-sm sm:text-xs font-bold outline-none text-center">
+                                <span class="text-neutral-500 w-12 sm:w-16 whitespace-nowrap overflow-hidden text-ellipsis block" title="${variacao.labelMedida}">${variacao.labelMedida}</span>
+                            </div>
+                            ${estoque[categoria].variacoes.length > 1 ? 
+                                `<button onclick="removerVariacao('${categoria}', ${variacao.id})" class="text-red-500 hover:bg-red-50 px-2 py-1.5 sm:py-1 rounded transition flex-shrink-0 ml-1" title="Excluir"><i class="fa-solid fa-trash text-sm sm:text-xs"></i></button>` : 
+                                `<div class="w-6 flex-shrink-0 ml-1"></div>` 
+                            }
+                        </div>
+                    `;
+                    containerLista.appendChild(divItem);
+                });
+
+                if(labelUso) labelUso.innerText = nomeAtivoEncontrado;
+            });
+        }
+
+        function atualizarCampoReceita(campo, valor) {
+            let num = parseFloat(valor);
+            if (isNaN(num) || num < 0) num = 0;
+            receitaBase[campo] = num;
+            salvarNoLocalStorage();
+        }
+
+        function atualizarCampoVariacao(categoria, id, campo, valor) {
+            let variacao = estoque[categoria].variacoes.find(v => v.id === id);
+            if(variacao) {
+                if(campo === 'nome') variacao.nome = valor;
+                if(campo === 'valor') variacao.valor = parseFloat(valor) || 0;
+                if(campo === 'medida') {
+                    let calc = parseFloat(valor) || 1; 
+                    variacao.medida = calc <= 0 ? 1 : calc; 
+                }
+            }
+            salvarNoLocalStorage();
+        }
+
+        function selecionarVariacao(categoria, id) {
+            estoque[categoria].ativoId = id;
+            salvarNoLocalStorage();
+            renderizarAbaSettings(); 
+        }
+
+        function adicionarVariacao(categoria) {
+            let labelPadrao = estoque[categoria].variacoes[0].labelMedida; 
+            let novoId = Date.now(); 
+            estoque[categoria].variacoes.push({
+                id: novoId,
+                nome: "Novo Tamanho",
+                valor: 0.00,
+                medida: 1,
+                labelMedida: labelPadrao
+            });
+            salvarNoLocalStorage();
+            renderizarAbaSettings();
+        }
+
+        function removerVariacao(categoria, idParaRemover) {
+            if (estoque[categoria].variacoes.length <= 1) return;
+            estoque[categoria].variacoes = estoque[categoria].variacoes.filter(v => v.id !== idParaRemover);
+            
+            if(estoque[categoria].ativoId === idParaRemover) {
+                estoque[categoria].ativoId = estoque[categoria].variacoes[0].id;
+            }
+            salvarNoLocalStorage();
+            renderizarAbaSettings();
+        }
+
+        function salvarNoLocalStorage() {
+            localStorage.setItem('lino_estoque_v14', JSON.stringify(estoque));
+            localStorage.setItem('lino_receita_v14', JSON.stringify(receitaBase));
+            atualizarCalculos(); 
+        }
+
+        function restaurarValoresPadrao() {
+            if (confirm('Restaurar preços e tamanhos originais definidos pelo código?')) {
+                estoque = JSON.parse(JSON.stringify(ESTOQUE_PADRAO));
+                receitaBase = JSON.parse(JSON.stringify(RECEITA_PADRAO));
+                salvarNoLocalStorage();
+                renderizarAbaSettings();
+            }
+        }
+
+        function getAtivo(categoria) {
+            let cat = estoque[categoria];
+            let selecionado = cat.variacoes.find(v => v.id === cat.ativoId);
+            return selecionado || cat.variacoes[0]; 
+        }
+
+        let custoMassaPorPedaco = 0;
+        let custoBaseFornada = 0;
+        
+        let gastosFornada = {
+            ovo: 0, acucar: 0, manteiga: 0, nescau: 0, farinha: 0, gas: 0
+        };
+
+        function atualizarCalculos() {
+            custoCalculado.ovoUn = getAtivo('ovo').valor / getAtivo('ovo').medida;
+            custoCalculado.acucarG = getAtivo('acucar').valor / getAtivo('acucar').medida;
+            custoCalculado.manteigaG = getAtivo('manteiga').valor / getAtivo('manteiga').medida;
+            custoCalculado.nescauG = getAtivo('nescau').valor / getAtivo('nescau').medida;
+            custoCalculado.farinhaG = getAtivo('farinha').valor / getAtivo('farinha').medida;
+
+            custoCalculado.gasFornada = getAtivo('gas').valor / getAtivo('gas').medida;
+            custoCalculado.embUnidade = getAtivo('embalagem').valor / getAtivo('embalagem').medida;
+
+            custoCalculado.recNutella = getAtivo('nutella').valor / getAtivo('nutella').medida;
+            custoCalculado.recNinho = getAtivo('ninho').valor / getAtivo('ninho').medida;
+            custoCalculado.recDoce = getAtivo('doce').valor / getAtivo('doce').medida;
+
+            gastosFornada.ovo = receitaBase.ovo * custoCalculado.ovoUn;
+            gastosFornada.acucar = receitaBase.acucar * custoCalculado.acucarG;
+            gastosFornada.manteiga = receitaBase.manteiga * custoCalculado.manteigaG;
+            gastosFornada.nescau = receitaBase.nescau * custoCalculado.nescauG;
+            gastosFornada.farinha = receitaBase.farinha * custoCalculado.farinhaG;
+            gastosFornada.gas = custoCalculado.gasFornada;
+
+            custoBaseFornada = gastosFornada.ovo + gastosFornada.acucar + gastosFornada.manteiga + gastosFornada.nescau + gastosFornada.farinha + gastosFornada.gas;
+
+            document.getElementById('side-custo-fornada').innerText = `R$ ${formatMoeda(custoBaseFornada)}`;
+            
+            document.getElementById('label-sidebar-ovo').innerText = `Ovos (${receitaBase.ovo} un):`;
+            document.getElementById('label-sidebar-acucar').innerText = `Açúcar (${receitaBase.acucar}g):`;
+            document.getElementById('label-sidebar-manteiga').innerText = `Manteiga (${receitaBase.manteiga}g):`;
+            document.getElementById('label-sidebar-nescau').innerText = `Nescau (${receitaBase.nescau}g):`;
+            document.getElementById('label-sidebar-farinha').innerText = `Farinha (${receitaBase.farinha}g):`;
+
+            document.getElementById('side-gasto-ovo').innerText = `R$ ${formatMoeda(gastosFornada.ovo)}`;
+            document.getElementById('side-gasto-acucar').innerText = `R$ ${formatMoeda(gastosFornada.acucar)}`;
+            document.getElementById('side-gasto-manteiga').innerText = `R$ ${formatMoeda(gastosFornada.manteiga)}`;
+            document.getElementById('side-gasto-nescau').innerText = `R$ ${formatMoeda(gastosFornada.nescau)}`;
+            document.getElementById('side-gasto-farinha').innerText = `R$ ${formatMoeda(gastosFornada.farinha)}`;
+            document.getElementById('side-gasto-gas').innerText = `R$ ${formatMoeda(gastosFornada.gas)}`;
+            
+            document.getElementById('side-custo-embalagem').innerText = `R$ ${formatMoeda(custoCalculado.embUnidade)}`;
+            document.getElementById('side-recheio-nutella').innerText = `R$ ${formatMoeda(custoCalculado.recNutella)}`;
+            document.getElementById('side-recheio-ninho').innerText = `R$ ${formatMoeda(custoCalculado.recNinho)}`;
+            document.getElementById('side-recheio-doce').innerText = `R$ ${formatMoeda(custoCalculado.recDoce)}`;
+
+            sabores.tradicional.produzido = parseInt(document.getElementById('prod-tradicional').value) || 0;
+            sabores.nutella.produzido = parseInt(document.getElementById('prod-nutella').value) || 0;
+            sabores.ninho.produzido = parseInt(document.getElementById('prod-ninho').value) || 0;
+            sabores.doce.produzido = parseInt(document.getElementById('prod-doce').value) || 0;
+
+            let fornadasHoje = parseFloat(document.getElementById('input-fornadas').value) || 0;
+            let custoTotalMassa = custoBaseFornada * fornadasHoje;
+
+            let totalPedacos = sabores.tradicional.produzido + sabores.nutella.produzido + sabores.ninho.produzido + sabores.doce.produzido;
+            document.getElementById('total-produzido-txt').innerText = `${totalPedacos} un`; 
+
+            if (totalPedacos > 0) {
+                custoMassaPorPedaco = custoTotalMassa / totalPedacos;
+            } else {
+                custoMassaPorPedaco = 0;
+            }
+            document.getElementById('custo-massa-pedaco-txt').innerText = `R$ ${formatMoeda(custoMassaPorPedaco)}`;
+        }
+
+        function renderizarFormVendas() {
+            let valoresDigitados = {};
+            for (let key in sabores) {
+                let inputQtd = document.getElementById(`venda-qtd-${key}`);
+                let inputPreco = document.getElementById(`venda-preco-${key}`);
+                if (inputQtd && inputPreco) {
+                    valoresDigitados[key] = {
+                        qtd: inputQtd.value,
+                        preco: inputPreco.value
+                    };
+                }
+            }
+
+            atualizarCalculos();
+            const container = document.getElementById('container-vendas-sabores');
+            container.innerHTML = '';
+
+            let possuiEstoque = false;
+
+            for (let key in sabores) {
+                let sab = sabores[key];
+                if (sab.produzido === 0) continue;
+                possuiEstoque = true;
+
+                if (sab.vendas.length === 0) {
+                    sab.vendas.push({ qtd: '', preco: PRECOS_SUGERIDOS_PADRAO[key] });
+                }
+
+                let totalVendidoVerificado = 0;
+                sab.vendas.forEach(v => {
+                    let q = parseInt(v.qtd, 10) || 0;
+                    if (totalVendidoVerificado + q > sab.produzido) {
+                        v.qtd = (sab.produzido - totalVendidoVerificado > 0) ? (sab.produzido - totalVendidoVerificado) : '';
+                    }
+                    totalVendidoVerificado += (parseInt(v.qtd, 10) || 0);
+                });
+
+                let disponivel = sab.produzido - totalVendidoVerificado;
+
+                let valorQtdTemp = (valoresDigitados[key] && valoresDigitados[key].qtd !== '') ? valoresDigitados[key].qtd : '';
+                let valorPrecoTemp = (valoresDigitados[key] && valoresDigitados[key].preco !== '') ? valoresDigitados[key].preco : PRECOS_SUGERIDOS_PADRAO[key].toFixed(2);
+
+                let div = document.createElement('div');
+                div.className = "p-3 sm:p-4 border border-cinza-claro-lino rounded-lg bg-neutral-50 space-y-2 text-sm sm:text-xs shadow-sm";
+                
+                let linhasHTML = sab.vendas.map((v, index) => `
+                    <div class="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-3 mt-3">
+                        <div class="w-full sm:flex-1 space-y-1">
+                            ${index === 0 ? `<label class="text-[11px] sm:text-[10px] font-bold text-neutral-600">Qtd Vendida:</label>` : ''}
+                            <input type="number" inputmode="numeric" id="venda-qtd-${key}-${index}" min="0" step="1" value="${v.qtd}" oninput="onInputVenda('${key}', ${index})" class="w-full bg-white border border-neutral-300 rounded-lg p-2.5 sm:p-1.5 text-base sm:text-sm font-bold outline-none focus:ring-1 focus:ring-bordo-lino placeholder-neutral-300" placeholder="0">
+                        </div>
+                        <div class="w-full sm:flex-1 space-y-1">
+                            ${index === 0 ? `<label class="text-[11px] sm:text-[10px] font-bold text-neutral-600">Preço Un. R$:</label>` : ''}
+                            <input type="number" inputmode="decimal" id="venda-preco-${key}-${index}" min="0" step="0.01" value="${v.preco}" oninput="onInputVenda('${key}', ${index})" class="w-full bg-white border border-neutral-300 rounded-lg p-2.5 sm:p-1.5 text-base sm:text-sm font-bold outline-none focus:ring-1 focus:ring-bordo-lino">
+                        </div>
+                        ${index > 0 ? `
+                            <div class="w-full sm:w-auto mt-2 sm:mt-0 flex justify-end">
+                                <button onclick="removerLinhaVenda('${key}', ${index})" class="text-red-500 bg-red-50 border border-red-100 hover:bg-red-100 px-3 py-2 sm:p-1.5 rounded-lg transition flex items-center justify-center h-full sm:h-[34px]" title="Remover valor"><i class="fa-solid fa-trash text-sm"></i></button>
+                            </div>
+                        ` : `
+                            <div class="hidden sm:block space-y-0.5 self-end opacity-0 pointer-events-none w-[34px] h-[34px]"></div>
+                        `}
+                    </div>
+                `).join('');
+
+                div.innerHTML = `
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center border-b border-neutral-200 pb-2">
+                        <div>
+                            <span class="font-bold text-base sm:text-sm text-neutral-900">${sab.nome}</span>
+                            <span class="text-xs sm:text-[10px] text-neutral-500 block mt-0.5 sm:mt-0">Produzidos: <b>${sab.produzido}</b> | Disponível: <b id="disp-${key}" class="text-bordo-lino">${disponivel} un</b></span>
+                        </div>
+                    </div>
+                    
+                    <div id="linhas-venda-${key}" class="pb-1">
+                        ${linhasHTML}
+                    </div>
+                    
+                    <div class="pt-2 flex justify-end">
+                        <button onclick="adicionarLinhaVenda('${key}')" class="text-xs sm:text-[10px] text-bordo-lino hover:text-bordo-lino underline font-bold bg-white px-2 py-1 rounded-md border border-neutral-100"><i class="fa-solid fa-plus"></i> Adicionar outro valor</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            }
+
+            if (!possuiEstoque) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-neutral-400">
+                        <i class="fa-solid fa-circle-exclamation text-3xl text-cinza-claro-lino block mb-2"></i>
+                        <p class="font-bold text-sm">Nenhum doce no estoque!</p>
+                        <p class="text-xs">Insira o rendimento da produção primeiro.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function onInputVenda(key, index) {
+            let inputQtd = document.getElementById(`venda-qtd-${key}-${index}`);
+            let inputPreco = document.getElementById(`venda-preco-${key}-${index}`);
+            
+            let valQtd = parseInt(inputQtd.value, 10);
+            if (isNaN(valQtd) || valQtd < 0) valQtd = 0;
+            
+            let valPreco = parseFloat(inputPreco.value);
+            if (isNaN(valPreco) || valPreco < 0) valPreco = 0;
+
+            let totalOutros = 0;
+            sabores[key].vendas.forEach((v, i) => {
+                if (i !== index) totalOutros += (parseInt(v.qtd, 10) || 0);
+            });
+
+            let maxPermitido = sabores[key].produzido - totalOutros;
+
+            if (valQtd > maxPermitido) {
+                valQtd = maxPermitido;
+                inputQtd.value = valQtd;
+            }
+
+            sabores[key].vendas[index].qtd = inputQtd.value === '' ? '' : valQtd;
+            sabores[key].vendas[index].preco = inputPreco.value === '' ? 0 : valPreco;
+
+            let totalVendidoNoSabor = totalOutros + (inputQtd.value === '' ? 0 : valQtd);
+            document.getElementById(`disp-${key}`).innerText = `${sabores[key].produzido - totalVendidoNoSabor} un`;
+        }
+
+        function adicionarLinhaVenda(key) {
+            sabores[key].vendas.push({ qtd: '', preco: PRECOS_SUGERIDOS_PADRAO[key] });
+            renderizarFormVendas(); 
+        }
+
+        function removerLinhaVenda(key, index) {
+            sabores[key].vendas.splice(index, 1);
+            renderizarFormVendas();
+        }
+
+        function obterCustoRecheio(key) {
+            if (key === 'nutella') return custoCalculado.recNutella;
+            if (key === 'ninho') return custoCalculado.recNinho;
+            if (key === 'doce') return custoCalculado.recDoce;
+            return 0; 
+        }
+
+        function calcularSimulacao() {
+            atualizarCalculos();
+            let meta = parseFloat(document.getElementById('input-meta-lucro').value) || 0;
+            const corpo = document.getElementById('tabela-simulacao-corpo');
+            corpo.innerHTML = '';
+
+            for (let key in sabores) {
+                let sab = sabores[key];
+                let custoRecheio = obterCustoRecheio(key);
+                let custoUnitario = custoMassaPorPedaco + custoCalculado.embUnidade + custoRecheio;
+                
+                if (custoUnitario === custoCalculado.embUnidade + custoRecheio) {
+                    let custoMassaHipotetico = custoBaseFornada / 24.00;
+                    custoUnitario += custoMassaHipotetico;
+                }
+
+                let precoVenda = PRECOS_SUGERIDOS_PADRAO[key];
+                let lucroPorUnidade = precoVenda - custoUnitario;
+                
+                let unidadesNecessarias = 0;
+                if (lucroPorUnidade > 0) {
+                    unidadesNecessarias = Math.ceil(meta / lucroPorUnidade);
+                }
+
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-3 py-2 font-bold text-neutral-900">${sab.nome}</td>
+                    <td class="px-3 py-2 text-neutral-600">R$ ${formatMoeda(custoUnitario)}</td>
+                    <td class="px-3 py-2 text-neutral-700">R$ ${formatMoeda(precoVenda)}</td>
+                    <td class="px-3 py-2 text-center text-emerald-700 font-bold">R$ ${formatMoeda(lucroPorUnidade)}</td>
+                    <td class="px-3 py-2 text-center bg-cinza-claro-lino font-black text-bordo-lino text-xs">${unidadesNecessarias <= 0 ? '0 un' : unidadesNecessarias + ' un'}</td>
+                `;
+                corpo.appendChild(tr);
+            }
+        }
+
+        function gerarRelatorio() {
+            atualizarCalculos();
+            const corpoRelatorio = document.getElementById('tabela-relatorio-corpo');
+            corpoRelatorio.innerHTML = '';
+
+            let receitaGeral = 0;
+            let custoGeralProduzido = 0;
+            let custoGeralVendido = 0;
+            let totalProduzidosGeral = 0;
+            let totalVendidosGeral = 0;
+
+            for (let key in sabores) {
+                let sab = sabores[key];
+                if (sab.produzido === 0) continue;
+
+                let custoRecheio = obterCustoRecheio(key);
+                let custoPorUnidade = custoMassaPorPedaco + custoCalculado.embUnidade + custoRecheio;
+                let custoTotalDesteSabor = sab.produzido * custoPorUnidade;
+
+                let unidadesVendidas = sab.vendas.reduce((acc, cur) => acc + (parseInt(cur.qtd, 10) || 0), 0);
+                let receitaDesteSabor = sab.vendas.reduce((acc, cur) => acc + ((parseInt(cur.qtd, 10) || 0) * (parseFloat(cur.preco) || 0)), 0);
+
+                let custoDaVendaEfetiva = custoPorUnidade * unidadesVendidas;
+                let lucroSabor = receitaDesteSabor - custoDaVendaEfetiva;
+                let sobraram = sab.produzido - unidadesVendidas;
+
+                receitaGeral += receitaDesteSabor;
+                custoGeralProduzido += custoTotalDesteSabor;
+                custoGeralVendido += custoDaVendaEfetiva;
+                totalProduzidosGeral += sab.produzido;
+                totalVendidosGeral += unidadesVendidas;
+
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-3 py-2 font-bold text-neutral-800 whitespace-nowrap">${sab.nome}</td>
+                    <td class="px-3 py-2 text-center">${sab.produzido} un</td>
+                    <td class="px-3 py-2 text-center font-semibold text-neutral-700">${unidadesVendidas} un</td>
+                    <td class="px-3 py-2 text-center text-neutral-500">${sobraram} un</td>
+                    <td class="px-3 py-2 text-right whitespace-nowrap">R$ ${formatMoeda(custoPorUnidade)}</td>
+                    <td class="px-3 py-2 text-right text-emerald-700 font-medium whitespace-nowrap">R$ ${formatMoeda(receitaDesteSabor)}</td>
+                    <td class="px-3 py-2 text-right font-black text-neutral-900 whitespace-nowrap">R$ ${formatMoeda(lucroSabor)}</td>
+                `;
+                corpoRelatorio.appendChild(tr);
+            }
+
+            let lucroRealTotal = receitaGeral - custoGeralVendido;
+            let caixaFinal = receitaGeral - custoGeralProduzido;
+
+            document.getElementById('rep-total-produzido').innerText = `${totalProduzidosGeral} un`;
+            document.getElementById('rep-total-vendido').innerText = `${totalVendidosGeral} un`;
+            document.getElementById('rep-faturamento').innerText = `R$ ${formatMoeda(receitaGeral)}`;
+            document.getElementById('rep-lucro').innerText = `R$ ${formatMoeda(lucroRealTotal)}`;
+            document.getElementById('rep-caixa-final').innerText = `R$ ${formatMoeda(caixaFinal)}`;
+
+            const caixaContainer = document.getElementById('alerta-caixa-container');
+            const caixaTitulo = document.getElementById('alerta-caixa-titulo');
+            const caixaDesc = document.getElementById('alerta-caixa-desc');
+
+            if (caixaFinal >= 0) {
+                caixaContainer.className = "p-3 rounded-lg border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3 bg-emerald-50 border-emerald-200 text-emerald-900";
+                caixaTitulo.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> Caixa Positivo`;
+                caixaDesc.innerText = "Faturamento cobriu integralmente os custos.";
+            } else {
+                caixaContainer.className = "p-3 rounded-lg border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3 bg-rose-50 border-rose-200 text-rose-900";
+                caixaTitulo.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-600"></i> Caixa Retido`;
+                caixaDesc.innerText = "Capital investido pendente em estoque.";
+            }
+
+            if (totalProduzidosGeral === 0) {
+                corpoRelatorio.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-neutral-400 italic">Nenhum dado lançado para consolidação.</td>
+                    </tr>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
